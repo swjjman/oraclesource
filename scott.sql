@@ -247,6 +247,59 @@ WHERE MGR IS NULL ;
 SELECT * FROM EMP e 
 WHERE MGR IS NOT NULL ;
 
+-- COMMISSION_PCT가 NULL이 아닌 사원들 중에서 COMMISSION = SALARY * COMMISSION_PCT를 구하여
+EMPLOYEE_ID, FIRST_NAME, JOB_ID, COMMISSON을 조회
+
+SELECT EMPLOYEE_ID, FIRST_NAME, JOB_ID, COMMISSION_PCT *SALARY AS COMMISSION
+FROM EMPLOYEES e 
+WHERE COMMISSION_PCT IS NOT NULL;
+
+-- NULL * 숫자 = NULL 
+
+SELECT EMPLOYEE_ID, FIRST_NAME, JOB_ID,SALARY,COMMISSION_PCT , COMMISSION_PCT *SALARY AS COMMISSION
+FROM EMPLOYEES e 
+
+
+-- FIRST_NAME 이 'curtis' 인 사원의 first_name, last_name, email, phone_number, job_id를 조회 
+(단 job-id 결과는 소문자로 출력)
+
+SELECT first_name, last_name, email, phone_number, LOWER(JOB_ID)
+FROM EMPLOYEES e
+WHERE FIRST_NAME = 'Steven';
+
+
+
+
+-- 부서번호가 60,70,80,90인 사원들의 employee_id, first_name, hire_date, job id 조회
+(단, job_id가 IT_PROG인 사원의 경우 프로그래머로 변경하여 출력한다.)
+
+SELECT employee_id, first_name, hire_date, REPLACE (job_id, 'IT PROG', '프로그래머') 
+FROM EMPLOYEES e 
+WHERE DEPARTMENT_ID IN (60,70,80,90)
+
+
+
+
+SELECT employee_id, first_name, hire_date, REPLACE(JOB_ID,'IT PROG','프로그래머') 
+FROM EMPLOYEES e 
+WHERE DEPARTMENT_ID IN (60,70,80,90)
+
+
+
+-- JOB_ID 가 AD_PRES, PU_CLERK 인 사원들의 EMPLOYEE_ID, FIRST_NAME, JOB_ID 조회
+(단, 사원명은 FIRST_NAME과 LAST_NAME 공백을 포함하여 연결)
+
+SELECT EMPLOYEE_ID, FIRST_NAME || ' ' || LAST_NAME AS NAME , JOB_ID
+FROM EMPLOYEES e 
+WHERE JOB_ID IN ('AD_PRES', 'PU_CLERK');
+
+
+
+SELECT EMPLOYEE_ID, FIRST_NAME || ' ' || LAST_NAME AS NAME, JOB_ID
+FROM EMPLOYEES e 
+WHERE JOB_ID IN ( 'AD_PRES', 'PU_CLERK');
+
+
 
 
 -- 집합연산자 
@@ -254,7 +307,6 @@ WHERE MGR IS NOT NULL ;
 합집합 (UNION, UNION ALL) - 출력 열 개수, 타입 동일해야함. 
 교집합 (INTERSECT)
 차집합 (MINUS) 
-
 
 -- 부서번호가 10번 혹은 20번인 사원 조회 
 
