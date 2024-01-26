@@ -744,8 +744,8 @@ SELECT
 	ENAME,
 	COMM,
 	CASE 
-		WHEN COMM IS NULL THEN '해당사항 없음'
-		WHEN COMM = 0 THEN '수당 없음'
+		WHEN COMM IS NULL THEN '해당사항 없음',
+		WHEN COMM = 0 THEN '수당 없음',
 		WHEN COMM > 0 THEN '수당 : ' || COMM
 	END AS COMM_TEXT
 FROM
@@ -788,6 +788,1040 @@ SELECT
 	NEXT_DAY(ADD_MONTHS(HIREDATE,3),'월요일') AS R_JOB,
 	NVL(TO_CHAR(COMM),'N/A' ) AS COMM
 FROM EMP e ;
+
+
+
+
+
+
+SELECT EMPNO , ENAME, MGR, 
+CASE 
+		WHEN MGR IS NULL THEN '0000'
+		WHEN MGR = '75__' THEN '5555'
+		WHEN MGR =  '76__' THEN '6666'
+	END AS COMM_TEXT
+FROM EMP e 
+
+
+실습 3 풀이 
+MGR은 숫자함수니까 SUBSTR 사용 위해 TO_CHAR로 변환 후 DECODE 함수 
+
+
+SELECT
+FROM EMP e 
+
+
+SELECT
+	EMPNO ,
+	ENAME ,
+	MGR,
+	DECODE(SUBSTR(TO_CHAR(MGR),1,2), NULL, '0000', '75','5555','76','6666','77','7777','78','8888'
+	,SUBSTR(TO_CHAR(MGR),1)) AS CHG_MGR 
+FROM
+	EMP e 
+
+
+
+
+SELECT
+	EMPNO ,
+	ENAME ,
+	MGR,
+CASE 
+	WHEN MGR IS NULL THEN '0000'
+	WHEN SUBSTR(TO_CHAR(MGR),1,2) = '75' THEN '5555'
+	WHEN SUBSTR(TO_CHAR(MGR),1,2) = '76' THEN '6666'
+	WHEN SUBSTR(TO_CHAR(MGR),1,2) = '77' THEN '7777'
+	WHEN SUBSTR(TO_CHAR(MGR),1,2) = '78' THEN '8888'
+	ELSE TO_CHAR(MGR)
+END AS CHR_MGR
+	FROM
+	EMP e; 
+
+
+NULL을 0으로 변환 후 CASE문 간단하게 
+
+SELECT
+	EMPNO ,
+	ENAME ,
+	MGR,
+CASE SUBSTR(TO_CHAR(NVL(MGR,0)),1,2)
+	WHEN '0' THEN '0000'
+	WHEN '75' THEN '5555'
+	WHEN '76' THEN '6666'
+	WHEN '77' THEN '7777'
+	WHEN '78' THEN '8888'
+	ELSE TO_CHAR(MGR)
+END AS CHR_MGR
+	FROM
+	EMP e; 
+
+
+다중행 함수 
+
+-- sum() , avg() , count() , max() , min()
+
+SUM
+
+-- 동일한 급여 제외 선택해서 합계 DISTINCT
+
+SELECT 
+SUM(DISTINCT SAL) 
+FROM EMP e 
+
+--단일 그룹의 그룹 함수가 아닙니다 9 (여러 행이 나올 수 있는 컬럼을 추가 한 경우 )
+SELECT SUM(SAL), AVG(SAL), COUNT(SAL), MAX(SAL), MIN(SAL), ENAME ★ 
+FROM EMP e 
+
+
+COUNT
+
+SELECT 
+COUNT(*) FROM EMP e 
+
+
+-- 부서번호가 30인 사원 수 조회  WHERE 절 추가 
+
+SELECT COUNT(*)  
+FROM EMP e 
+WHERE DEPTNO = 30
+
+-- 부서번호가 30인 사원 중 최대 급여
+
+SELECT MAX(SAL)  
+FROM EMP e 
+WHERE DEPTNO = 30
+
+-- 부서번호가 20인 사원의 입사일 중에서 제일 최근 입사일 조회 
+
+SELECT MAX(HIREDATE)  
+FROM EMP e 
+WHERE DEPTNO = 20
+
+-- 부서번호가 20인 사원의 입사일 중에서 제일 오래된 입사일 조회 
+
+
+SELECT MIN(HIREDATE)  
+FROM EMP e 
+WHERE DEPTNO = 20
+
+
+-- 부서번호가 30인 사원 중 SAL 중복 값 제거 후 평균 구하기 
+
+SELECT AVG(DISTINCT(SAL)) FROM EMP e
+WHERE DEPTNO = 30;
+
+
+-- 부서별 급여 합계 구하기 
+
+SELECT SUM(SAL) 
+FROM EMP e
+WHERE DEPTNO = 10 
+UNION 
+SELECT SUM(SAL) 
+FROM EMP e
+WHERE DEPTNO = 20 
+UNION
+SELECT SUM(SAL) 
+FROM EMP e
+WHERE DEPTNO = 30
+
+
+GROUP BY : 결과 값을 원하는 열로 묶기
+
+GROUP BY 표현식이 아닙니다. 
+-- GROUP BY 옆에 오는 컬럼만 SELECT 절에 사용 가능. 
+
+SELECT 보고싶은 컬럼
+⑴
+FROM 테이블명 
+⑵
+WHERE 조건 나열 
+⑶
+GROUP BY 그룹화 할 열이름 . . . (HAVING - GROUP BY 절에 조건을 사용할 때)
+⑷
+ORDER BY 정렬 조건 
+⑸
+
+-- 순서 ⑵ -> ⑴ -> GROUP BY -> HAVING -> ⑴ -> ⑸
+
+
+
+SELECT DEPTNO, SUM(SAL) 
+FROM EMP e 
+GROUP BY DEPTNO;
+
+
+-- 부서별 급여 평균 
+
+
+SELECT 
+DEPTNO , AVG(ROUND() SAL) 
+FROM EMP e 
+GROUP BY DEPTNO
+ORDER BY DEPTNO;
+ 
+
+-- 부서번호, 직무별 급여 평균 
+
+SELECT
+DEPTNO , JOB ,AVG(SAL) 
+FROM
+	EMP e 
+	GROUP BY DEPTNO ,JOB 
+ORDER BY DEPTNO ;
+
+
+
+-- 부서별 직책의 평균 급여가 500 이상인 사원들의 부서번호, 직책, 부서별 직책 평균 급여 
+
+
+SELECT
+DEPTNO , JOB ,AVG(SAL) 
+FROM
+	EMP e 
+	GROUP BY DEPTNO ,JOB HAVING AVG(SAL) >= 500
+ORDER BY DEPTNO, JOB;
+
+
+
+
+
+SELECT
+DEPTNO , JOB ,AVG(SAL) 
+FROM
+	EMP e 
+WHERE SAL <= 3000
+	GROUP BY DEPTNO ,JOB HAVING AVG(SAL) >= 2000
+ORDER BY DEPTNO, JOB;
+
+
+
+
+-- 같은 직무에 종사하는 사원이 3명 이상인 직무와 인원수 출력
+
+SELECT
+ JOB, COUNT(JOB) 
+FROM EMP e
+ GROUP BY JOB HAVING COUNT(JOB) >= 3
+ 
+ 
+-- 사원들의 입사연도를 기준으로 부서별 몇명이 입사했는지 조회 
+
+ 
+ SELECT
+ TO_CHAR(SYSDATE , YYYY.MM.D),HIREDATE, COUNT(DEPTNO)  
+FROM
+GROUP BY HIREDATE
+	EMP e 
+ 
+
+
+SELECT TO_CHAR(HIREDATE ,'YYYY') AS 연도, DEPTNO AS 부서번호 , COUNT(*)  AS 인원수
+FROM EMP e
+GROUP BY TO_CHAR(HIREDATE ,'YYYY') , DEPTNO
+
+
+
+
+
+
+JOIN - 여러 테이블을 하나의 테이블 처럼 사용
+
+
+내부조인 (일치하는 값이 있는 경우)
+
+
+SELECT * FROM EMP e ,DEPT d 
+WHERE E.DEPTNO = D.DEPTNO ;
+
+
+
+SELECT
+	D.DEPTNO ,E.ENAME ,E.SAL,D.DNAME ,D.LOC 
+FROM
+	EMP e ,
+	DEPT d
+WHERE
+	E.DEPTNO = D.DEPTNO ;
+
+
+-- 조인 조건이 없을 때 나올 수 있는 모든 조합이 반환 (WHERE 없을 때 )
+
+SELECT
+	D.DEPTNO ,E.ENAME ,E.SAL,D.DNAME ,D.LOC 
+FROM
+	EMP e ,
+	DEPT d
+
+
+	
+
+SELECT
+	D.DEPTNO ,E.ENAME ,E.SAL,D.DNAME ,D.LOC 
+FROM
+	EMP e ,
+	DEPT d
+WHERE
+	E.DEPTNO = D.DEPTNO  AND e.SAL >= 3000;
+
+
+
+-- 표준 구문 ( A  (INNER) JOIN B ON A = B)
+
+SELECT
+	D.DEPTNO ,E.ENAME ,E.SAL,D.DNAME ,D.LOC 
+FROM
+	EMP e JOIN DEPT d ON E.DEPTNO = D.DEPTNO 
+WHERE
+	e.SAL >= 3000;
+
+
+SELECT
+	D.DEPTNO ,E.ENAME ,E.SAL,D.DNAME ,D.LOC 
+FROM
+	EMP e INNER JOIN DEPT d ON E.DEPTNO = D.DEPTNO 
+WHERE
+	e.SAL >= 3000;
+
+
+
+
+EMP, SALGRADE 조인
+
+SELECT S.GRADE ,E.ENAME ,E.SAL  FROM EMP e ,SALGRADE s 
+WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL 
+
+
+
+
+EMP , EMP 조인 (SELF 조인 )
+
+
+
+SELECT
+	E.EMPNO, E.ENAME, E.MGR ,E2.ENAME AS MGR_NAME
+FROM
+	EMP e ,
+	EMP e2
+WHERE
+	E.MGR = E2.EMPNO ;
+
+
+
+외부조인 
+-- 일치하지 않는 데이터를 화면에 반환시킬 수 있음. 
+
+
+-- 왼쪽 외부조인
+
+SELECT
+	E.EMPNO, E.ENAME, E.MGR ,E2.ENAME AS MGR_NAME
+FROM
+	EMP e LEFT OUTER JOIN 
+	EMP e2
+ON
+	E.MGR = E2.EMPNO ;
+
+
+-- 오른쪽 외부조인
+
+SELECT
+	E.EMPNO, E.ENAME, E.MGR ,E2.ENAME AS MGR_NAME
+FROM
+	EMP e RIGHT OUTER JOIN 
+	EMP e2
+ON
+	E.MGR = E2.EMPNO ;
+
+
+
+-- 각 부서별 평균 급여, 최대 급여 최소 급여, 사원 수
+-- 부서번호, 부서명, 평균 급여, 최대 급여 최소 급여, 사원 수
+
+SELECT E.DEPTNO ,D.DNAME ,ROUND( AVG(SAL),0), MAX(SAL), MIN(SAL),COUNT(SAL)  
+FROM EMP e JOIN DEPT d ON E.DEPTNO = D.DEPTNO 
+GROUP BY E.DEPTNO,D.DNAME  
+
+
+
+-- 3개 테이블 조인하기.
+
+SELECT
+	*
+FROM
+	EMP e 
+JOIN EMP e2 ON
+	e1.empno = e2.EMPNO
+JOIN EMP e3 ON
+	e2.EMPNO = E3.EMPNO 
+	
+	
+-- 모든 부서 정보와 사원 정보를 출력 
+--	부서번호(DEPTNO), 사원 이름 순으로 정렬, DEPT 테이블이 기준  
+-- 부서번호, 부서명, 사원번호, 사원명, 직무명 급여 
+
+	
+SELECT D.DEPTNO, D.DNAME, E.EMPNO ,E.ENAME ,E.JOB, E.SAL  
+FROM
+	DEPT d
+LEFT OUTER JOIN EMP e ON
+	D.DEPTNO = E.DEPTNO
+	ORDER BY D.DEPTNO , E.ENAME ;
+
+
+
+SELECT D.DEPTNO, D.DNAME, E.EMPNO ,E.ENAME ,E.JOB, E.SAL  
+FROM
+	EMP e 
+RIGHT OUTER JOIN DEPT d  ON
+	D.DEPTNO = E.DEPTNO
+	ORDER BY D.DEPTNO , E.ENAME ;
+
+-- 모든 부서 정보와 사원 정보를 출력 
+--	부서번호(DEPTNO), 사원 이름 순으로 정렬, DEPT 테이블이 기준  
+-- 부서번호, 부서명, 사원번호, 사원명, 직무명 급여, LOSAL, HISAL, GRADE 
+
+
+SELECT
+	D.DEPTNO,
+	D.DNAME,
+	E.EMPNO ,
+	E.ENAME ,
+	E.JOB,
+	E.SAL,
+	S.LOSAL ,
+	S.HISAL, 
+	S.GRADE 
+FROM
+	DEPT d
+LEFT OUTER JOIN EMP e ON
+	D.DEPTNO = E.DEPTNO
+LEFT OUTER JOIN SALGRADE s ON E.SAL BETWEEN S.LOSAL AND S.HISAL 
+	ORDER BY
+	D.DEPTNO ,
+	E.ENAME ;
+
+
+
+
+1/26 
+
+
+
+서브 쿼리 
+-- SQL 문 안에 내부에서 SELECT 문을 사용 
+-- 괄호로 묶어서 사용 
+-- 메인쿼리의 비교 대상과 같은 자료형과 같은 개수로 지정 
+
+
+-- JONES 사원의 급여보다 높은 급여를 받는 사원 조회 
+
+1.SELECT SAL
+  FROM
+  EMP e 
+  WHERE ENAME = 'JONES';
+
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	SAL > (
+	SELECT
+		SAL
+	FROM
+		EMP e
+	WHERE
+		ENAME = 'JONES');
+
+	
+	
+--	ALLEN이 받는 COMM 보다 많은 추가수당을 받는 사원 조회 
+	
+	SELECT COMM 
+	FROM EMP e 
+WHERE ENAME = 'ALLEN'
+
+
+
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	COMM < (
+	SELECT
+		COMM
+	FROM
+		EMP e
+	WHERE
+		ENAME = 'ALLEN'
+)
+
+
+
+-- WARD 사원의 입사일보다 빠른 입사자 조회 
+
+
+
+SELECT HIREDATE FROM EMP e 
+WHERE ENAME = 'WARD'
+
+
+
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	HIREDATE < (
+	SELECT
+		HIREDATE
+	FROM
+		EMP e
+	WHERE
+		ENAME = 'WARD'
+)
+
+
+
+
+-- 20번 부서에 속한 사원 중 전체 사원의 평균 급여보다 높은 급여를 받는 사원 조회 
+-- 사번 , 사원명, 직무, 급여, 부서번호, 부서명 , 지역 
+
+
+SELECT
+	EMPNO ,
+	ENAME ,
+	JOB,
+	SAL,
+	D.DNAME ,
+	D.LOC
+FROM
+	EMP e
+JOIN DEPT d ON
+	E.DEPTNO = D.DEPTNO
+WHERE
+	E.DEPTNO = 20
+	AND E.SAL > (
+	SELECT
+		AVG(SAL)
+	FROM
+		EMP e) ;
+
+
+
+단일행 서브쿼리
+
+-- 서브쿼리 실행 결과가 단 하나의 행으로 나오는 서브 쿼리 
+-- 사용 가능 연산자 :  >  ,  < , >= , <= , <> , ^=, != 
+
+다중행 서브쿼리 
+	
+-- 서브쿼리 실행 결과가 여러 행으로 나오는 서브 쿼리 
+-- 사용 가능 연산자 : IN , = ANY(SOME) ,  ALL , EXISTS
+
+-- IN , = ANY(SOME) : 메인 쿼리의 조건식을 만족하는 서브쿼리가 하나 이상  
+-- ALL : 메인 쿼리의 조건식을 서브쿼리의 결과 모두가 만족
+-- EXISTS : 서브쿼리의 결과가 존재하면 		
+
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	SAL IN  (
+	SELECT
+		MAX(SAL)
+	FROM
+		EMP e2
+	GROUP BY
+		DEPTNO) ;	
+	
+		
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	SAL = ANY  (
+	SELECT
+		MAX(SAL)
+	FROM
+		EMP e2
+	GROUP BY
+		DEPTNO) ;	
+	
+	
+
+	
+--	30번 부서 사원들의 최대 급여보다 적은 급여를 받는 사원 조회 
+	
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	SAL < ANY  (
+	SELECT
+		SAL
+	FROM
+		EMP e2
+	WHERE DEPTNO = 30 ) ;	
+
+--	30번 부서 사원들의 최소 급여보다 적은 급여를 받는 사원 조회 
+	
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	SAL < ALL  (
+	SELECT
+		SAL
+	FROM
+		EMP e2
+	WHERE DEPTNO = 30 ) ;	
+
+	
+	
+	
+	--	EXIST 상관 X 
+	
+	
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	EXISTS  (
+	SELECT
+		DNAME
+	FROM
+		DEPT d 
+	WHERE DEPTNO = 20 ) ;	
+
+		
+실습	
+
+SELECT
+	job,
+	EMPNO ,
+	ENAME ,
+	sal,
+	DEPTNO ,
+	d.DNAME
+FROM
+	EMP e
+JOIN DEPT d ON
+	e.DEPTNO = d.DEPTNO
+WHERE JOB  
+	IN 
+	( SELECT JOB  FROM EMP 
+	WHERE ENAME = 'ALEEN')
+	
+	
+	
+	
+	
+SELECT
+	E.EMPNO ,
+	E.ENAME ,
+	D.DNAME ,
+	E.HIREDATE ,
+	D.LOC ,
+	E.SAL ,
+	S.GRADE
+FROM
+	EMP e
+JOIN DEPT d ON
+	E.DEPTNO = D.DEPTNO
+JOIN SALGRADE s ON
+E.SAL BETWEEN S.LOSAL AND S.HISAL H
+WHERE
+	 E.SAL > (
+	SELECT
+		AVG(E.SAL)
+	FROM
+		EMP e
+		) 
+
+	
+	
+	
+다중 열 서브쿼리 
+
+-- 부서별 급여 최대값 
+
+
+SELECT
+	*
+FROM
+	EMP e
+WHERE
+	(DEPTNO ,
+	SAL) IN 
+(
+	SELECT
+		DEPTNO,
+		MAX(SAL)
+	FROM
+		EMP e
+	GROUP BY
+		DEPTNO )
+
+	
+	
+	-- 기존의 직업을 여전히 가지고 있는 사원들의 사번 및 job_id 조회 
+	
+
+	서브쿼리 
+	
+		SELECT
+	e.EMPLOYEE_ID ,
+	e.JOB_ID
+FROM
+	EMPLOYEES e
+WHERE
+	(e.JOB_ID,
+	e.EMPLOYEE_ID) IN 
+	(
+	SELECT
+		jh.JOB_ID,
+		jh.employee_id
+	FROM
+		JOB_HISTORY jh )
+
+
+	조인
+	
+	SELECT
+	DISTINCT e.EMPLOYEE_ID ,
+	e.JOB_ID
+FROM
+	EMPLOYEES e
+JOIN JOB_HISTORY jh ON
+	e.EMPLOYEE_ID = jh.EMPLOYEE_ID
+WHERE
+	e.JOB_ID IN 
+	(
+	SELECT
+		jh.JOB_ID
+	FROM
+		JOB_HISTORY jh )
+
+
+
+
+
+FROM 절에 서브쿼리 사용 ( 인라인 뷰 )
+
+
+SELECT E10.EMPNO, E10.ENAME, E10.DEPTNO, D.DNAME, D.LOC
+FROM
+	(
+	SELECT
+		*
+	FROM
+		EMP
+	WHERE
+		DEPTNO = 10 ) E10,
+	(
+	SELECT
+		*
+	FROM
+		DEPT) D
+WHERE E10.DEPTNO = D.DEPTNO;
+
+	
+SELECT 절에 사용하는 서브쿼리 (스칼라 서브쿼리)	
+	
+
+SELECT
+	EMPNO ,
+	ENAME,
+	JOB,
+	SAL,
+	(
+	SELECT
+		GRADE
+	FROM
+		SALGRADE s
+	WHERE
+		E.SAL BETWEEN S.LOSAL AND S.HISAL) AS SALGRADE
+FROM
+	EMP e 
+
+
+
+
+DML
+-- Data Manipulation Language : 데이터 조작언어 
+
+SELECT (조회) 
+INSERT (삽입)
+UPDATE (수정)
+DELETE (삭제)
+
+	
+	
+
+-- 기존 테이블을 복제해서 새로운 테이블 생성 
+CREATE TABLE DEPT_TEMP AS SELECT * FROM DEPT d ;
+
+
+-- 새로운 부서 생성 
+
+INSERT
+INTO 테이블명 (열이름 1 ~~)
+VALUES (데이터 ~~)
+
+
+
+INSERT
+	INTO
+	DEPT_TEMP dt (DEPTNO,
+	DNAME,
+	LOC)
+VALUES(60,
+'DATABASE',
+'BUSAN');
+
+-- 열이름 안넣어도 되긴함 근데 웬만하면 넣음 
+
+INSERT
+	INTO
+	DEPT_TEMP dt 
+VALUES(70,
+'DATABASE',
+'BUSAN');
+
+
+
+ 값의 수가 충분하지 않습니다
+INSERT
+	INTO
+	DEPT_TEMP dt 
+VALUES(80,
+'DATABASE');
+
+
+
+이 열에 대해 지정된 전체 자릿수보다 큰 값이 허용됩니다. Properties 글자 수 확인.
+
+INSERT
+	INTO
+	DEPT_TEMP dt (DEPTNO, DNAME)
+VALUES(800,
+'DATABASE');
+
+
+ INSERT
+	INTO
+	DEPT_TEMP dt (DEPTNO, DNAME, LOC)
+VALUES(80, 'DATABASE', NULL);
+
+
+
+
+
+CREATE TABLE EMP_TEMP AS SELECT * FROM EMP e  
+
+
+
+
+INSERT INTO 
+EMP_TEMP et (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(8000, 'HONG', 'MANAGER', 7902,'2015-03-15',1000, NULL,50 );
+
+
+
+INSERT INTO 
+EMP_TEMP et (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(9000, 'SONG', 'MANAGER', 7782,SYSDATE,1200, 800,50 );
+
+
+-- 테이블의 구조만 복사 ( 데이터 복사 X ) 
+
+CREATE TABLE EMP_TEMP2 AS SELECT * FROM EMP e WHERE 1<>1;  
+
+
+
+
+UPDATE (수정)
+
+UPDATE 테이블명
+SET 수정 내용 , , , , ;
+
+
+UPDATE DEPT_TEMP 
+SET LOC = 'BUSAN';
+
+
+
+UPDATE 테이블명
+SET 수정 내용 , , , , 
+WHERE 조건 ;
+
+
+UPDATE DEPT_TEMP 
+SET LOC = 'SEOUL'
+WHERE DEPTNO = 50
+
+UPDATE DEPT_TEMP 
+SET LOC = 'POHANG', DNAME = 'NETWORK'
+WHERE DEPTNO = 40
+
+
+
+
+DELETE (삭제)
+
+DELETE 테이블명
+WHERE 조건
+
+
+
+DELETE DEPT_TEMP
+WHERE DEPTNO = 20;
+
+
+
+DELETE 
+FROM 테이블명
+WHERE 조건
+
+
+
+DELETE FROM DEPT_TEMP
+WHERE DEPTNO = 30;
+
+DELETE FROM EXAM_EMP ee 
+WHERE EMPNO = 7201;
+
+
+서브쿼리 + DELETE 
+
+-- 급여 등급이 3등급이고, 30번 부서에 사원 삭제 
+
+
+
+DELETE
+FROM
+	EMP_TEMP et
+WHERE
+	EMPNO IN 
+(SELECT EMPNO 
+	FROM
+		EMP_TEMP et
+	JOIN SALGRADE s ON
+		ET.SAL BETWEEN S.LOSAL AND S.HISAL
+		AND S.GRADE = 3
+		AND ET.DEPTNO = 30)
+
+
+서브쿼리 + UPDATE
+
+
+UPDATE DEPT_TEMP 
+SET (DNAME,LOC) = SELECT DNAME, LOC FROM DEPT d WHERE DEPTNO = 40)
+WHERE DEPTNO = 40;
+
+
+
+
+서브쿼리 + INSERT 
+
+
+INSERT
+	INTO
+	EMP_TEMP et (EMPNO,
+	ENAME,
+	JOB,
+	MGR,
+	HIREDATE,
+	SAL,
+	COMM,
+	DEPTNO)
+SELECT
+	E1.EMPNO ,
+	E1.ENAME,
+	E1.JOB,
+	E1,
+	MGR ,
+	E1.HIREDATE,
+	E1.SAL ,
+	E1.COMM ,
+	E1.DEPTNO
+FROM
+	EMP e E1
+JOIN SALGRADE s ON
+	E1.SAL BETWEEN S.LOSAL AND S.HISAL
+	AND S.GRADE = 1 
+
+
+
+
+CREATE TABLE EXAM_EMP AS SELECT * FROM EMP e  WHERE 1<>1;  
+
+CREATE TABLE EXAM_DEPT AS SELECT * FROM DEPT d  WHERE  1<>1;  
+
+
+CREATE TABLE EXAM_SALGRADE AS SELECT * FROM  SALGRADE s WHERE 1<>1;  
+
+
+
+
+
+
+DELETE FROM EXAM_EMP ee 
+WHERE EMPNO = 7101;
+
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7201, 'TEST_USER1', 'MANAGER', 7788,'2016-01-02',4500, 0 ,50 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7202, 'TEST_USER2', 'CLERK', 7201,'2016-02-21',1800, 0 ,50 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7203, 'TEST_USER3', 'ANALYST', 7201,'2016-04-11',3400, 0 ,60 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7204, 'TEST_USER4', 'SALESMAN', 7201,'2016-05-31',2700, 300 ,60 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7205, 'TEST_USER5', 'CLERK', 7201,'2016-07-20',2600, 0 ,70 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7206, 'TEST_USER6', 'CLERK', 7201,'2016-09-08',2600, 0 ,70 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7207, 'TEST_USER7', 'LECTURER', 7201,'2016-10-28',2300, 0 ,80 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7208, 'TEST_USER8', 'STUDENT', 7201,'2018-03-09',1200, 0 ,80 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7201, 'TEST_USER1', 'MANAGER', 7788,'2016-01-02',4500, 0 ,50 );
+
+INSERT INTO 
+EXAM_EMP ee  (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+VALUES(7201, 'TEST_USER1', 'MANAGER', 7788,'2016-01-02',4500, 0 ,50 );
+
+
+COMMIT;
+
 
 
 
