@@ -1828,3 +1828,443 @@ COMMIT;
 
 
 
+
+
+실습 3 
+
+UPDATE  EXAM_EMP 
+SET DEPTNO = 70
+WHERE SAL > (SELECT AVG(sal) FROM EXAM_EMP ee WHERE DEPTNO = 50);
+
+
+
+
+실습 4
+
+UPDATE EXAM_EMP SET SAL  = SAL * 1.1 , DEPTNO = 80 WHERE 
+HIREDATE > (SELECT MIN(HIREDATE) FROM EXAM_EMP ee WHERE DEPTNO =60)
+
+
+
+실습 5 
+
+DELETE FROM EXAM_EMP  WHERE empno IN (SELECT empno fROM EXAM_EMP, SALGRADE s)
+WHERE sal BETWEEN s.losal AND s.hisal AND grade = 5);
+
+
+
+
+
+1/29 
+
+
+Trandsaction 
+-- 하나의 작업 또는 밀접하게 연관되어 있는 작업 수행을 위해 나눌 수 없는 최소 작업 단위 
+
+-- 최종 반영 (COMMIT) , 모두 취소 (ROLLBACK)
+
+LOCK 
+-- 한 세션에서 트랜잭션 작업이 완료되지 않으면 
+-- 다른 세션에서 작업을 처리할 수 없는 상태 (DML - INSERT, UPDATE, DELETE)
+
+
+SQL 
+
+DDL :  CREATE , ALTER 
+DML :  SELECT , INSERT, UPDATE, delete
+DCL : 권한부여 
+ 
+
+데이터 정의어 (DDL) - 테이블 정의, 사용자 정의, 권한 부여(취소)
+
+
+--
+테이블 생성 ( CREATE )
+
+CREATE TABLE 테이블 이름  ( 
+필드명, 필드타입(크기), 제약조건, )
+
+
+-- 기존 테이블을 복제해서 새로운 테이블 생성 
+CREATE TABLE DEPT_TEMP AS SELECT * FROM DEPT d ;
+
+
+-- 테이블의 구조만 복사 ( 데이터 복사 X ) 
+
+CREATE TABLE EMP_TEMP2 AS SELECT * FROM EMP e WHERE 1<>1;  
+
+
+
+문자로 시작, 30BYTE 이하로 작성 , 한 테이블 안 열이름 중복 불가
+열 이름은 문자, 0-9, 특수문자($, #, _) 사용가능
+SQL키워드는 열 이름으로 사용 불가 (ORDER, GROUP, SELECT,,,)
+
+
+문자 
+-- CHAR, VACHAR2 , NCHAR , NVARCHAR2 , CLOB , NCLOB , LONG
+
+-- CHAR , VACHAR : 열의 너비가 고정값인지 가변인지
+
+CHAR (10)  -  10자리 고정
+VARCHAR2 (10) - 10자리 이내 가변
+
+
+- 사용하는 바이트 수 통일 
+NCHAR (10) - 10자리 고정 유니코드  (한글 입력하기 편함 (한글은 3바이트니까))
+NVARCHAR2 (10) - 10자리 가변 유니코드 
+
+
+
+CLOB - 문자열 데이터를 외부 파일로 저장 / 많은 텍스트 데이터 입력시 사용 (4GB)
+
+LONG - 2GB 저장 가능 
+
+
+
+숫자 
+-- NUMEBER , BINARY_FLOAT, BINARY_DOUBLE
+
+NUMBER (전체자릿수 , 소수점 자리수)
+
+
+
+날짜 
+-- DATE, TIMESTAMP
+
+
+
+
+테이블 변경 ( ALTER)
+
+-- 열 추가 (ADD)
+
+ALTER TABLE 테이블명 ADD 추가할 열이름 데이터타임; (10 (크기))
+
+-- 열 이름 변경 (RENAME)
+
+ALTER TABLE 테이블명 RENAME COLUMN 기존 열이름 TO 변경 열이름;
+
+-- 열 자료형 변경 (MODIFY)
+
+ALTER TABLE 테이블명 DROP 열이름 데이터타입; (10 (크기))
+
+-- 열 제거 (DROP)
+
+ALTER TABLE 테이블명 DROP COLUMN 열이름; 
+
+-- 테이블명 변경
+
+RENAME 변경 전 테이블명 TO 변경할 테이블명 
+
+
+삭제 ( DROP)
+
+-- 테이블 삭제 
+
+DROP TABLE 테이블명; 
+
+
+
+가상 테이블 (VIEW)
+
+-- 편리성 : 복잡한 쿼리문 저장 용도
+-- 보안성 : 작업 저장 용도 
+
+-- 권한을 가진 사용자만 생성할 수 있음.
+-- VIEW를 통해 데이터 삽입 시 원본에도 영향을 미침
+
+
+CREATE VIEW 뷰 이름 AS (SELECT * FROM 원본 테이블명 )
+
+-- VIEW를 통해 원본 수정 가능 
+
+CREATE VIEW 뷰 이름 AS (SELECT * FROM 원본 테이블명 ) WITH READ ONLY;
+
+-- VIEW를 통해 읽기만 가능 
+
+
+
+권한이 불충분합니다
+-- system에서 권한 부여 
+
+
+확인
+SELECT * FROM USER_UPDATABLE_COLUMNS 
+WHERE TABLE_NAME '테이블 이름'
+
+
+
+-----------------------------------------
+
+INDEX - 색인, 목차 
+
+-- 기본키, 고유키일 때 자동으로 생성됨.
+
+
+CREATE INDEX 인덱스명 ON 테이블명 (인덱스로 사용할 필드명)
+
+
+
+
+-- 테이블 생성 - 구조, 데이터복사 
+CREATE TABLE Idx_employees AS SELECT DISTINCT first_name, last_name, hire_date FROM EMPLOYEES e ;
+
+
+-- 인덱스 생성 : RANGE SCAN , 데이터가 많을수록 효력
+
+CREATE INDEX idx_name ON idx_employees(first_name) 
+
+
+-- 생성 안할 때 : FULL SCAN
+
+SELECT * FROM EMPLOYEES e  WHERE FIRST_NAME = 'Jack';
+
+
+
+
+
+시퀀스 
+-- 오라클 객체, 하나씩 증가하는 값이 필요할 때 주로 사용
+-- 다른 DB의 auto_increment 와 동일한 역할 
+
+
+CREATE SEQUENCE 시퀀스명 INCREMENT BY 증감값 START WITH 시작값 MAXVALUE 최대값  MINVALUE 최소값  
+NOCYCLE CACHE 숫자 ; 
+
+--  기본시퀀스 : 1에서 시작 ~ / 1씩 증가 
+
+CREATE SEQUENCE dept_seq;
+
+DROP SEQUENCE dept_seq;
+
+-- 마지막으로 생성된 시퀀스 확인
+SELECT dept_seq.currval FROM dual;
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE SEQUENCE dept_seq INCREMENT BY 10 START WITH 10 MAXVALUE 90 MINVALUE 0 NOCYCLE CACHE 2;
+
+
+
+
+
+CREATE TABLE DEPT_SUQUENCE AS SELECT * FROM DEPT WHERE 1<>1;
+
+SELECT * FROM USER_SEQUENCE;
+
+CREATE SEQUENCE dept_seq;
+
+INSERT INTO DEPT_SEQUENCE(DEPTNO, DNAME, LOC) VALUES (DEPT_SEQ.NEXTVAL,'DATABASE','SEOUL' ); 
+
+INSERT INTO dept_sequences(deptno,dname,loc) 
+VALUES (dept_seq.nextval, 'database', 'seoul');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE INDEX IDX_EMP_SAL ON EMP(SAL);
+
+
+
+SELECT * FROM USER_IND_COLUMNS;
+
+DROP INDEX IDX_EMP_SAL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE VIEW VM_EMP30 AS ( SELECT * FROM EMP WHERE DEPTNO = 30) WITH READ ONLY ;
+
+
+
+
+CREATE VIEW VM_EMP20 AS ( SELECT * FROM EMP WHERE 
+DEPTNO = 20);
+
+
+
+CREATE VIEW VM_EMP20 AS ( SELECT * FROM EMP WHERE DEPTNO = 20);
+
+
+
+SELECT * FROM vm_emp20;
+
+DROP TABLE EMP_ALTER ;
+
+
+INSERT INTO vm_emp20 
+VALUES (8888,'HONG','ANALYST',7902,SYSDATE, 2500, NULL, 20);
+
+
+SELECT * FROM EMP e ;
+
+
+DROP VIEW VM_EMP30 ;
+DROP VIEW VM_EMP30 ;
+
+
+SELECT * FROM USER_UPDATABLE_COLUMNS 
+WHERE TABLE_NAME = 'VM_EMP30';
+
+
+
+
+
+
+RENAME EMP_DDL TO EMP_ALTER;
+
+ALTER TABLE EMP_DDL  DROP COLUMN MOBILE; 
+
+
+ALTER TABLE EMP_DDL ADD HP VARCHAR2(15); 
+
+
+ALTER TABLE EMP_DDL MODIFY EMPNO NUMBER(5); 
+
+
+ALTER TABLE EMP_DDL RENAME COLUMM HP TO MOBILE; 
+
+ALTER TABLE EMP_DDL RENAME COLUMN HP TO MOBILE;
+
+
+
+
+
+
+SELECT * FROM EMP_DDL ed 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE EMP_DDL (EMPNO NUMBER (4), ENAME VARCHAR (10), JOB VARCHAR(9), MGR NUMBER(4), HIREDATE DATE, SAL NUMBER(7,2) , 
+COMM NUMBER(7,2) , DEPTNO NUMBER (2) );
+
+
+
+SELECT * FROM EMP_DDL ed 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+INSERT INTO dept_temp VALUES (55, 'network', 'seoul');
+UPDATE DEPT_TEMP SET LOC = 'BUSAN' WHERE DEPTNO = 55;
+
+COMMIT;
+
+ROLLBACK;
+
+
+
+
+
+
+
+SELECT * FROM DEPT_TEMP dt 
+
+DELETE FROM DEPT_TEMP dt WHERE DEPTNO = 55;
+UPDATE DEPT_TEMP SET DNAME = 'WEB' WHERE DEPTNO = 10;
+
+
+
+
+
+
+
+
+
+
+
+
