@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-01-29T04:00:10.883Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0" etag="2zyRzsOC50rKiKbvsCNB" version="23.0.2" type="github" pages="2">
+<mxfile host="app.diagrams.net" modified="2024-01-29T06:06:27.752Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0" etag="9uEHaB5stf0FZbpejVwr" version="23.0.2" type="github" pages="2">
   <diagram name="ERD" id="Xg-WonZgStYIxwr8SuyV">
     <mxGraphModel dx="1446" dy="857" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -37,12 +37,6 @@
         </mxCell>
         <mxCell id="qNlBxmiXCqH9INy3AF_P-14" value="등급" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
           <mxGeometry x="10" y="420" width="100" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="qNlBxmiXCqH9INy3AF_P-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="85" y="530" as="targetPoint" />
-            <mxPoint x="85" y="490" as="sourcePoint" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="qNlBxmiXCqH9INy3AF_P-17" value="적립금" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
           <mxGeometry x="10" y="480" width="100" height="40" as="geometry" />
