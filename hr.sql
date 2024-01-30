@@ -743,6 +743,40 @@ IN
 
 
 
+SELECT * FROM Idx_employees WHERE FIRST_NAME = 'Jack';
+
+
+-- 테이블 생성 - 구조, 데이터복사 
+CREATE TABLE Idx_employees AS SELECT DISTINCT first_name, last_name, hire_date FROM EMPLOYEES e ;
+
+
+-- 인덱스 생성 : RANGE SCAN , 데이터가 많을수록 효력
+
+CREATE INDEX idx_name ON idx_employees(first_name) 
+
+
+-- 생성 안할 때 : FULL SCAN
+
+SELECT * FROM EMPLOYEES e  WHERE FIRST_NAME = 'Jack';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
